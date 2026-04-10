@@ -26,7 +26,7 @@ OTHER_DIR = "C:/Users/kmackey/Code"
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-411*r*42g-cbl1u4ndxz1+xs%gsub8y^5@!4wevcq@lsqj)%4_'
+SECRET_KEY = 'secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
