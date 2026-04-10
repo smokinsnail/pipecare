@@ -19,7 +19,7 @@ TEMPLATES_DIR = BASE_DIR / 'templates'
 STATIC_DIR = BASE_DIR / 'pipedamage/static'
 PIC_DIR = 'pic_upload'
 FAULT_DIR = BASE_DIR / 'faults_pics'
-OTHER_DIR = "C:/Users/kmackey/Code"
+OTHER_DIR = "C:/Users/Code"
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +29,7 @@ OTHER_DIR = "C:/Users/kmackey/Code"
 SECRET_KEY = 'secret'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
