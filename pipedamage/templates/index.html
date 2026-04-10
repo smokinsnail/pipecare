@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1">
+    <link href="{% static 'mystyle.css' %}" rel="stylesheet"/>
+    <title>Pipe Assessment Tool</title>
+</head>
+
+    <body>
+        <div class="content">
+            <h1>Pipe Assessment Tool</h1>
+
+            <div class="actions_container">
+
+                <form action="{% url 'index_plus' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+    
+                        <p>
+                            <h2 id="number1">1</h2>
+                            <label id="picker_label" for="picker">Choose Video</label>
+                            <br>
+                            <br>
+                            <br>
+                            {{form.imageFile}}
+                            
+                        </p>
+                        
+                        <p>
+                            <h2 id="number2">2</h2>
+                            
+                            <input id="process_button" type="submit" name="process_img" value="Process Video">
+                        </p>
+                </form>
+
+
+                {% if documents %}
+                <p id="success_message">Upload Complete</p>
+                {% endif %}
+
+                
+
+            </div>
+        </div>
+    </body>
+</html>
+
+

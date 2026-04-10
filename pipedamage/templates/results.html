@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body_block %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<h1> Pipe Care - Results</h1>
+
+
+<button id="select_All_Button" class="select_all_button">Select All</button>
+
+<h3 id="filter_button_labels">Filter Results by Fault Type:</h3>
+<div id="FilterContainer">
+    <button class="filter_button active" onclick="filterSelection('result')"> Show all</button>
+    <button class="filter_button" onclick="filterSelection('roots')"> Roots</button>
+    <button class="filter_button" onclick="filterSelection('broken')"> Broken</button>
+    <button class="filter_button" onclick="filterSelection('settled')"> Settled Deposits</button>
+    <button class="filter_button" onclick="filterSelection('attached')"> Attached Deposits</button>
+    <button class="filter_button" onclick="filterSelection('other')"> Other</button>
+  </div>
+
+
+<div class="result_container">
+
+<p class = 'hidden' id="video_name">{{path_name}}</p>
+
+
+
+<!-- Loop through fault_files list returned from views --> 
+<!-- Add each fault as a class to the image --> 
+
+
+{% for x,y in fault_files %}  
+    <div class="result" id="result{{forloop.counter}}">
+        
+    
+    <button id="selectButton{{forloop.counter}}" class="result_button">
+        <img id={{forloop.counter}} class="result_pic" src ="{{ x }}" alt="Button Image" />  
+    </button>
+    
+    <script>
+        const filterElement{{forloop.counter}} = document.getElementById('result{{forloop.counter}}');
+         
+    </script> 
+    {% with outerLoop=forloop.counter %}
+    <ul id="label_list{{forloop.counter}}">
+        {% for z in y %} 
+            <li class="label_list_element{{outerLoop}}">{{z.0}} : {{z.1}}</li>
+            {% if z.0 == 'Roots' %} 
+            <script>
+                filterElement{{outerLoop}}.classList.add('roots');
+            </script>
+            
+            {% elif z.0 == 'Cracked / Broken' %}
+            <script>
+                filterElement{{outerLoop}}.classList.add('broken');
+            </script>
+
+            {% elif z.0 == 'Settled Deposits' %}
+            <script>
+                filterElement{{outerLoop}}.classList.add('settled');
+            </script>
+
+            {% elif z.0 == 'Attached Deposits' %}
+            <script>
+                filterElement{{outerLoop}}.classList.add('attached');
+            </script>
+            {% else %}
+            <script>
+                filterElement{{outerLoop}}.classList.add('other');
+            </script>
+          {% endif %}
+        {% endfor %}
+        {% endwith %}
+    </ul>
+
+    
+
+    
+    <script>
+        const selectButton{{forloop.counter}} = document.getElementById('selectButton{{forloop.counter}}');
+        const imageElement{{forloop.counter}} = document.getElementById("{{forloop.counter}}");
+        selectButton{{forloop.counter}}.addEventListener('click', 
+        function () 
+        {
+            
+            if (selected_images.includes(imageElement{{forloop.counter}})) {
+                const index = selected_images.indexOf(imageElement{{forloop.counter}});
+                selected_images.splice(index,1);
+                isAllSelected = false;
+                removeBorder(imageElement{{forloop.counter}});
+            }
+
+            else {
+                selected_images.push(imageElement{{forloop.counter}});
+                addBorder(imageElement{{forloop.counter}});
+            }
+            
+        });
+
+          
+    </script>
+    </div>
+{% endfor %}
+
+</div>
+
+<script>
+    filterSelection("all")
+    function filterSelection(c) {
+      var x, i;
+      x = document.getElementsByClassName("result");
+      if (c == "all") c = "";
+      for (i = 0; i < x.length; i++) {
+        w3RemoveClass(x[i], "show");
+        if (x[i].className.indexOf(c) > -1) w3AddClass(x[i], "show");
+      }
+    }
+    
+    function w3AddClass(element, name) {
+      var i, arr1, arr2;
+      arr1 = element.className.split(" ");
+      arr2 = name.split(" ");
+      for (i = 0; i < arr2.length; i++) {
+        if (arr1.indexOf(arr2[i]) == -1) {element.className += " " + arr2[i];}
+      }
+    }
+    
+    function w3RemoveClass(element, name) {
+      var i, arr1, arr2;
+      arr1 = element.className.split(" ");
+      arr2 = name.split(" ");
+      for (i = 0; i < arr2.length; i++) {
+        while (arr1.indexOf(arr2[i]) > -1) {
+          arr1.splice(arr1.indexOf(arr2[i]), 1);     
+        }
+      }
+      element.className = arr1.join(" ");
+    }
+    
+    // Add active class to the current button (highlight it)
+    var btnContainer = document.getElementById("FilterContainer");
+    var btns = btnContainer.getElementsByClassName("filter_button");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function(){
+        var current = document.getElementsByClassName("active");
+        current[0].className = current[0].className.replace(" active", "");
+        this.className += " active";
+      });
+    }
+    </script>
+
+<button id="JS_report_button">Generate Report</button>
+
+<script>
+let selected_images = [];
+let empty_array = [];
+let isAllSelected = false;
+
+function addBorder(pic) {
+        pic.style.border = "10px solid greenyellow";
+}
+    
+function removeBorder(pic) {
+        pic.style.border = "none";
+}
+    
+        //If the list is empty - add all the images, if contains some images, add all others*/
+        const selectAllButton = document.getElementById('select_All_Button');
+        let all_images = document.getElementsByClassName("result_pic");
+        selectAllButton.addEventListener('click', 
+            function () 
+            {
+    
+                if (isAllSelected == false) {
+                    selected_images = [].slice.call(all_images);
+                    isAllSelected = true;
+                    selected_images.forEach(addBorder);
+                    }
+                
+                else {
+                    selected_images = [];
+                    isAllSelected = false;
+                    all_images.forEach(removeBorder);
+                }
+                
+            });
+
+    //Link the function to the button
+    const JSreport = document.getElementById('JS_report_button');
+   
+    JSreport.addEventListener('click', function () 
+    {
+
+
+        //Create new pdf
+        const { jsPDF } = window.jspdf;
+        var doc = new jsPDF('p','px','a4');
+
+        // Create the canvas
+        var canvas = document.createElement('canvas');
+        canvas.width = 1000;
+        canvas.height = 2000;
+
+        // Set initial x,y position variables
+        let x = 0;
+        let y = 60; 
+        let count = 0; 
+        let page = 1;
+
+        // Set canvas context to allow drawing
+        var ctx = canvas.getContext('2d');
+
+        // Set report title
+        let title = "Survey Report";
+        ctx.font = "30px Arial";
+
+        // Add title to canvas
+        ctx.fillText(title,300,30);
+
+        //Loop through selected_items list and add each to canvas
+        selected_images.forEach(addToCanvas);
+
+        //Draw the elements on the canvas
+        function addToCanvas(item) {
+    
+        
+        // position first item on the top left
+        if (count == 0) {
+            x = 75; 
+        }
+        
+        // position second item on the top right
+        else if (count == 1) {
+            x = 400; 
+            y = 60;
+        }
+
+        // alternate image positions left and right, two images per row
+        else if (count % 2 == 0) {
+            x = 75; 
+            y = y + 250;
+        }
+
+        else {
+            x = 400; 
+            
+        }
+
+
+        // draw the image on the canvas based on position set above
+        ctx.drawImage(document.getElementById(item.id), x,y,300,200);
+        
+        // Set the font size for the fault labels
+        ctx.font = "10px Arial";
+        
+        // Get the labels which matches the image
+
+        var img_fault_labels = "label_list_element"+(item.id).toString();
+        var fault_label_collection = document.getElementsByClassName(img_fault_labels);
+        
+        var line_spacing = 5;
+        var indent = 5;
+
+        // Write the label onto the canvas under the matching image
+
+        for (let i = 0; i < fault_label_collection.length; i++) {
+        
+        var fault_label_text = fault_label_collection[i].innerText.toString();
+        ctx.fillText(fault_label_text,x+indent,(y+210+line_spacing));
+        line_spacing += 10;
+
+        }
+        
+        count += 1;
+        
+
+        // If count is > 7: (when there are 8 images on the canvas)
+        // add existing canvas to pdf
+        // add a new page
+        // reset count to 0
+        // reset x and y to initial values
+       
+
+        if (count > 7){ 
+            
+            var img = canvas.toDataURL("image/png");
+            doc.addImage(img, 'JPEG', 10, 10);
+            doc.addPage();
+            count = 0;
+            x = 0;
+            y = 60;
+            var blank_canvas = document.createElement('canvas');
+            blank_canvas.width = 1000;
+            blank_canvas.height = 2000;
+            blank_ctx = blank_canvas.getContext('2d');
+            canvas = blank_canvas;
+            ctx = canvas.getContext('2d');
+            //ctx = ctx2;
+             // Set report title
+            ctx.font = "30px Arial";
+
+            // Add title to canvas
+            ctx.fillText(title,300,30);
+
+        }
+
+        }
+
+        //Convert the canvas with the images to one image
+        var img = canvas.toDataURL("image/png");
+        
+        // Adds the image created from the canvas to the pdf
+        doc.addImage(img, 'JPEG', 10, 10);
+
+        //Save the PDF
+        var save_file_name =  document.getElementById('video_name').textContent;
+        //doc.save('Report.pdf');
+        doc.save(save_file_name);
+        
+    });
+</script>
+
+{% endblock %}
